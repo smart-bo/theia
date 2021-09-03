@@ -17,11 +17,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as electron from '../../../shared/electron';
-import { inject, injectable } from 'inversify';
-import { ContextMenuRenderer, RenderContextMenuOptions, ContextMenuAccess, FrontendApplicationContribution, CommonCommands, coordinateFromAnchor } from '../../browser';
+import { inject, injectable, postConstruct } from 'inversify';
+import {
+    ContextMenuRenderer, RenderContextMenuOptions, ContextMenuAccess, FrontendApplicationContribution, CommonCommands, coordinateFromAnchor, PreferenceService
+} from '../../browser';
 import { ElectronMainMenuFactory } from './electron-main-menu-factory';
 import { ContextMenuContext } from '../../browser/menu/context-menu-context';
 import { MenuPath, MenuContribution, MenuModelRegistry } from '../../common';
+import { BrowserContextMenuRenderer } from '../../browser/menu/browser-context-menu-renderer';
 
 export class ElectronContextMenuAccess extends ContextMenuAccess {
     constructor(readonly menu: electron.Menu) {
@@ -73,27 +76,43 @@ export class ElectronTextInputContextMenuContribution implements FrontendApplica
 }
 
 @injectable()
-export class ElectronContextMenuRenderer extends ContextMenuRenderer {
+export class ElectronContextMenuRenderer extends BrowserContextMenuRenderer {
 
     @inject(ContextMenuContext)
     protected readonly context: ContextMenuContext;
 
-    constructor(@inject(ElectronMainMenuFactory) private menuFactory: ElectronMainMenuFactory) {
-        super();
+    @inject(PreferenceService)
+    protected readonly preferenceService: PreferenceService;
+
+    protected customTitleBarStyle: boolean = false;
+
+    constructor(@inject(ElectronMainMenuFactory) private electronMenuFactory: ElectronMainMenuFactory) {
+        super(electronMenuFactory);
     }
 
-    protected doRender({ menuPath, anchor, args, onHide }: RenderContextMenuOptions): ElectronContextMenuAccess {
-        const menu = this.menuFactory.createContextMenu(menuPath, args);
-        const { x, y } = coordinateFromAnchor(anchor);
-        const zoom = electron.webFrame.getZoomFactor();
-        // x and y values must be Ints or else there is a conversion error
-        menu.popup({ x: Math.round(x * zoom), y: Math.round(y * zoom) });
-        // native context menu stops the event loop, so there is no keyboard events
-        this.context.resetAltPressed();
-        if (onHide) {
-            menu.once('menu-will-close', () => onHide());
+    @postConstruct()
+    protected async init(): Promise<void> {
+        await this.preferenceService.ready;
+        this.customTitleBarStyle = this.preferenceService.get('window.titleBarStyle') === 'custom';
+    }
+
+    protected doRender(options: RenderContextMenuOptions): ContextMenuAccess {
+        if (this.customTitleBarStyle) {
+            return super.doRender(options);
+        } else {
+            const { menuPath, anchor, args, onHide } = options;
+            const menu = this.electronMenuFactory.createElectronContextMenu(menuPath, args);
+            const { x, y } = coordinateFromAnchor(anchor);
+            const zoom = electron.webFrame.getZoomFactor();
+            // x and y values must be Ints or else there is a conversion error
+            menu.popup({ x: Math.round(x * zoom), y: Math.round(y * zoom) });
+            // native context menu stops the event loop, so there is no keyboard events
+            this.context.resetAltPressed();
+            if (onHide) {
+                menu.once('menu-will-close', () => onHide());
+            }
+            return new ElectronContextMenuAccess(menu);
         }
-        return new ElectronContextMenuAccess(menu);
     }
 
 }

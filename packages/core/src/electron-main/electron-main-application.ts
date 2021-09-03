@@ -15,7 +15,7 @@
  ********************************************************************************/
 
 import { inject, injectable, named } from 'inversify';
-import { screen, globalShortcut, app, BrowserWindow, BrowserWindowConstructorOptions, Event as ElectronEvent } from '../../shared/electron';
+import { screen, globalShortcut, ipcMain, app, BrowserWindow, BrowserWindowConstructorOptions, Event as ElectronEvent } from '../../shared/electron';
 import * as path from 'path';
 import { Argv } from 'yargs';
 import { AddressInfo } from 'net';
@@ -31,6 +31,7 @@ import { ElectronSecurityTokenService } from './electron-security-token-service'
 import { ElectronSecurityToken } from '../electron-common/electron-token';
 import Storage = require('electron-store');
 import { DEFAULT_WINDOW_HASH } from '../browser/window/window-service';
+import { isWindows } from '../common';
 const createYargs: (argv?: string[], cwd?: string) => Argv = require('yargs/yargs');
 
 /**
@@ -180,6 +181,10 @@ export class ElectronMainApplication {
     readonly backendPort = this._backendPort.promise;
 
     protected _config: FrontendApplicationConfig | undefined;
+    protected frame: boolean = this.electronStore.get('windowstate')?.frame ?? !isWindows;
+    protected originalFrames = new Map<number, boolean>();
+    protected restarting = false;
+
     get config(): FrontendApplicationConfig {
         if (!this._config) {
             throw new Error('You have to start the application first.');
@@ -231,6 +236,7 @@ export class ElectronMainApplication {
     async getLastWindowOptions(): Promise<TheiaBrowserWindowOptions> {
         const windowState: TheiaBrowserWindowOptions | undefined = this.electronStore.get('windowstate') || this.getDefaultTheiaWindowOptions();
         return {
+            frame: this.frame,
             ...windowState,
             ...this.getDefaultOptions()
         };
@@ -325,6 +331,7 @@ export class ElectronMainApplication {
         const y = Math.round(bounds.y + (bounds.height - height) / 2);
         const x = Math.round(bounds.x + (bounds.width - width) / 2);
         return {
+            frame: this.frame,
             isFullScreen: false,
             isMaximized: false,
             width,
@@ -346,31 +353,37 @@ export class ElectronMainApplication {
      * Save the window geometry state on every change.
      */
     protected attachSaveWindowState(electronWindow: BrowserWindow): void {
-        const saveWindowState = () => {
-            try {
-                const bounds = electronWindow.getBounds();
-                this.electronStore.set('windowstate', {
-                    isFullScreen: electronWindow.isFullScreen(),
-                    isMaximized: electronWindow.isMaximized(),
-                    width: bounds.width,
-                    height: bounds.height,
-                    x: bounds.x,
-                    y: bounds.y
-                });
-            } catch (e) {
-                console.error('Error while saving window state:', e);
-            }
-        };
         let delayedSaveTimeout: NodeJS.Timer | undefined;
         const saveWindowStateDelayed = () => {
             if (delayedSaveTimeout) {
                 clearTimeout(delayedSaveTimeout);
             }
-            delayedSaveTimeout = setTimeout(saveWindowState, 1000);
+            delayedSaveTimeout = setTimeout(() => this.saveWindowState(electronWindow), 1000);
         };
-        electronWindow.on('close', saveWindowState);
+        electronWindow.on('close', () => {
+            this.saveWindowState(electronWindow);
+            this.originalFrames.delete(electronWindow.id);
+        });
         electronWindow.on('resize', saveWindowStateDelayed);
         electronWindow.on('move', saveWindowStateDelayed);
+        this.originalFrames.set(electronWindow.id, this.frame);
+    }
+
+    protected saveWindowState(electronWindow: BrowserWindow): void {
+        try {
+            const bounds = electronWindow.getBounds();
+            this.electronStore.set('windowstate', {
+                isFullScreen: electronWindow.isFullScreen(),
+                isMaximized: electronWindow.isMaximized(),
+                width: bounds.width,
+                height: bounds.height,
+                x: bounds.x,
+                y: bounds.y,
+                frame: this.frame
+            });
+        } catch (e) {
+            console.error('Error while saving window state:', e);
+        }
     }
 
     /**
@@ -475,6 +488,19 @@ export class ElectronMainApplication {
         app.on('will-quit', this.onWillQuit.bind(this));
         app.on('second-instance', this.onSecondInstance.bind(this));
         app.on('window-all-closed', this.onWindowAllClosed.bind(this));
+
+        ipcMain.on('titleBarStyle-changed', ({ sender }, titleBarStyle: string) => {
+            this.frame = titleBarStyle === 'native';
+            this.saveWindowState(BrowserWindow.fromId(sender.id));
+        });
+
+        ipcMain.on('restart', ({ sender }) => {
+            this.restart(sender.id);
+        });
+
+        ipcMain.on('request-titleBarStyle', ({ sender }) => {
+            sender.send('original-titleBarStyle', this.originalFrames.get(sender.id) ? 'native' : 'custom');
+        });
     }
 
     protected onWillQuit(event: ElectronEvent): void {
@@ -493,7 +519,22 @@ export class ElectronMainApplication {
     }
 
     protected onWindowAllClosed(event: ElectronEvent): void {
-        this.requestStop();
+        if (!this.restarting) {
+            this.requestStop();
+        }
+    }
+
+    protected restart(id: number): void {
+        this.restarting = true;
+        BrowserWindow.fromId(id).close();
+        setTimeout(async () => {
+            await this.launch({
+                secondInstance: false,
+                argv: this.processArgv.getProcessArgvWithoutBin(process.argv),
+                cwd: process.cwd()
+            });
+            this.restarting = false;
+        }, 500);
     }
 
     protected async startContributions(): Promise<void> {
