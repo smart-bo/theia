@@ -22,6 +22,22 @@ import * as fs from '@theia/core/shared/fs-extra';
 const NLS_REGEX = /^%([\w\d.-]+)%$/i;
 
 export async function loadManifest(pluginPath: string, locale?: string): Promise<any> {
+    try {
+        console.error('====== before READ json === ', pluginPath, path.join(pluginPath, 'package.json'));
+        fs.readJson(path.join(pluginPath, 'package.json'));
+        console.error('====== after READ json === ', pluginPath);
+    } catch (error) {
+        console.error('====== ERROR READ json === ', pluginPath);
+    }
+
+    try {
+        console.error('====== before LOAD translations === ', pluginPath);
+        loadTranslations(pluginPath, locale);
+        console.error('====== after  LOAD translations === ', pluginPath);
+    } catch (error) {
+        console.error('====== ERROR LOAD translations === ', pluginPath);
+    }
+
     const [manifest, translations] = await Promise.all([
         fs.readJson(path.join(pluginPath, 'package.json')),
         loadTranslations(pluginPath, locale)

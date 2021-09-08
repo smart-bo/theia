@@ -122,7 +122,10 @@ export class HostedPluginServerImpl implements HostedPluginServer {
 
     protected async localizePlugin(plugin: DeployedPlugin, locale: string): Promise<DeployedPlugin> {
         const packagePath = plugin.metadata.model.packagePath;
-        const translatedManifest = await loadManifest(packagePath, locale);
+        const packageUri = plugin.metadata.model.packageUri;
+        console.error('++++++++++ packageUri +++ ', packageUri);
+        console.error('++++++++++ packagePath +++ ', packagePath);
+        const translatedManifest = await loadManifest(packageUri, locale);
         this.mergeContributes(plugin.contributes, translatedManifest.contributes);
         return plugin;
     }
