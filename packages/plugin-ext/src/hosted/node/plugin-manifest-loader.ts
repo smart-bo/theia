@@ -23,7 +23,8 @@ const NLS_REGEX = /^%([\w\d.-]+)%$/i;
 
 export async function loadManifest(pluginPath: string, locale?: string): Promise<any> {
     try {
-        console.error('====== before READ json === ', pluginPath, path.join(pluginPath, 'package.json'));
+        console.error('*************************** load Manifets *********** ', pluginPath);
+        console.error('====== before READ json === ', path.join(pluginPath, 'package.json'));
         fs.readJson(path.join(pluginPath, 'package.json'));
         console.error('====== after READ json === ', pluginPath);
     } catch (error) {

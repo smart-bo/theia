@@ -125,7 +125,7 @@ export class HostedPluginServerImpl implements HostedPluginServer {
         const packageUri = plugin.metadata.model.packageUri;
         console.error('++++++++++ packageUri +++ ', packageUri);
         console.error('++++++++++ packagePath +++ ', packagePath);
-        const translatedManifest = await loadManifest(packageUri, locale);
+        const translatedManifest = await loadManifest(packagePath, locale);
         this.mergeContributes(plugin.contributes, translatedManifest.contributes);
         return plugin;
     }
