@@ -19,6 +19,7 @@ import { Disposable, MaybePromise, CancellationTokenSource } from '../common';
 import { Key } from './keyboard/keys';
 import { Widget, BaseWidget, Message, addKeyListener, codiconArray } from './widgets';
 import { FrontendApplicationContribution } from './frontend-application';
+import { nls } from './nls';
 
 @injectable()
 export class DialogProps {
@@ -64,6 +65,13 @@ export namespace DialogError {
         }
         return error.message;
     }
+}
+
+export namespace Dialog {
+    export const YES = nls.localize('vscode/extensionsUtils/yes', 'Yes');
+    export const NO = nls.localize('vscode/extensionsUtils/no', 'No');
+    export const OK = nls.localize('vscode/dialog/ok', 'OK');
+    export const CANCEL = nls.localize('vscode/explorerViewer/cancel', 'Cancel');
 }
 
 @injectable()
@@ -191,14 +199,14 @@ export abstract class AbstractDialog<T> extends BaseWidget {
         this.update();
     }
 
-    protected appendCloseButton(text: string = 'Cancel'): HTMLButtonElement {
+    protected appendCloseButton(text: string = Dialog.CANCEL): HTMLButtonElement {
         this.closeButton = this.createButton(text);
         this.controlPanel.appendChild(this.closeButton);
         this.closeButton.classList.add('secondary');
         return this.closeButton;
     }
 
-    protected appendAcceptButton(text: string = 'OK'): HTMLButtonElement {
+    protected appendAcceptButton(text: string = Dialog.OK): HTMLButtonElement {
         this.acceptButton = this.createButton(text);
         this.controlPanel.appendChild(this.acceptButton);
         this.acceptButton.classList.add('main');

@@ -36,11 +36,12 @@ import { ColorContribution } from '@theia/core/lib/browser/color-application-con
 import { ColorRegistry, Color } from '@theia/core/lib/browser/color-registry';
 import { ScmCommand } from './scm-provider';
 import { ScmDecorationsService } from '../browser/decorations/scm-decorations-service';
+import { nls } from '@theia/core/lib/browser/nls';
 
 export const SCM_WIDGET_FACTORY_ID = ScmWidget.ID;
 export const SCM_VIEW_CONTAINER_ID = 'scm-view-container';
 export const SCM_VIEW_CONTAINER_TITLE_OPTIONS: ViewContainerTitleOptions = {
-    label: 'Source Control',
+    label: nls.localize('vscode/scm.contribution/source control', 'Source Control'),
     iconClass: codicon('source-control'),
     closeable: true
 };
@@ -99,7 +100,7 @@ export class ScmContribution extends AbstractViewContribution<ScmWidget> impleme
         super({
             viewContainerId: SCM_VIEW_CONTAINER_ID,
             widgetId: SCM_WIDGET_FACTORY_ID,
-            widgetName: 'Source Control',
+            widgetName: SCM_VIEW_CONTAINER_TITLE_OPTIONS.label,
             defaultWidgetOptions: {
                 area: 'left',
                 rank: 300

@@ -45,7 +45,7 @@ export namespace nls {
 
     export function localize(key: string, defaultValue: string, ...args: string[]): string {
         let value = defaultValue;
-        if (localization) {
+        if (localization && key) {
             const translation = localization.translations[key];
             if (translation) {
                 // vscode's localizations often contain additional '&&' symbols, which we simply ignore

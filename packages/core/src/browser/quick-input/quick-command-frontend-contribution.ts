@@ -19,6 +19,7 @@ import { KeybindingRegistry, KeybindingContribution } from '../keybinding';
 import { CommonMenus } from '../common-frontend-contribution';
 import { CLEAR_COMMAND_HISTORY, quickCommand, QuickCommandService } from './quick-command-service';
 import { QuickInputService } from './quick-input-service';
+import { nls } from '../nls';
 
 @injectable()
 export class QuickCommandFrontendContribution implements CommandContribution, KeybindingContribution, MenuContribution {
@@ -43,7 +44,7 @@ export class QuickCommandFrontendContribution implements CommandContribution, Ke
     registerMenus(menus: MenuModelRegistry): void {
         menus.registerMenuAction(CommonMenus.VIEW_PRIMARY, {
             commandId: quickCommand.id,
-            label: 'Find Command...'
+            label: nls.localize('vscode/quickAccess.contribution/commandsQuickAccess', 'Find Command...')
         });
     }
 

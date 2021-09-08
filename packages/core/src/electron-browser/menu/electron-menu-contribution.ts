@@ -20,42 +20,42 @@ import {
     Command, CommandContribution, CommandRegistry,
     isOSX, isWindows, MenuModelRegistry, MenuContribution, Disposable
 } from '../../common';
-import { ApplicationShell, KeybindingContribution, KeybindingRegistry, PreferenceScope, PreferenceService } from '../../browser';
+import { ApplicationShell, CommonCommands, KeybindingContribution, KeybindingRegistry, PreferenceScope, PreferenceService } from '../../browser';
 import { FrontendApplication, FrontendApplicationContribution, CommonMenus } from '../../browser';
 import { ElectronMainMenuFactory } from './electron-main-menu-factory';
 import { FrontendApplicationStateService, FrontendApplicationState } from '../../browser/frontend-application-state';
 import { ZoomLevel } from '../window/electron-window-preferences';
 
 export namespace ElectronCommands {
-    export const TOGGLE_DEVELOPER_TOOLS: Command = {
+    export const TOGGLE_DEVELOPER_TOOLS = Command.toLocalizedCommand({
         id: 'theia.toggleDevTools',
         label: 'Toggle Developer Tools'
-    };
-    export const RELOAD: Command = {
+    }, 'vscode/developerActions/toggleDevTools');
+    export const RELOAD = Command.toLocalizedCommand({
         id: 'view.reload',
         label: 'Reload Window'
-    };
-    export const ZOOM_IN: Command = {
+    }, 'vscode/windowActions/reloadWindow');
+    export const ZOOM_IN = Command.toLocalizedCommand({
         id: 'view.zoomIn',
         label: 'Zoom In'
-    };
-    export const ZOOM_OUT: Command = {
+    }, 'vscode/windowActions/zoomIn');
+    export const ZOOM_OUT = Command.toLocalizedCommand({
         id: 'view.zoomOut',
         label: 'Zoom Out'
-    };
-    export const RESET_ZOOM: Command = {
+    }, 'vscode/windowActions/zoomOut');
+    export const RESET_ZOOM = Command.toLocalizedCommand({
         id: 'view.resetZoom',
         label: 'Reset Zoom'
-    };
-    export const CLOSE_WINDOW: Command = {
+    }, 'vscode/windowActions/zoomReset');
+    export const CLOSE_WINDOW = Command.toLocalizedCommand({
         id: 'close.window',
         label: 'Close Window'
-    };
-    export const TOGGLE_FULL_SCREEN: Command = {
+    }, 'vscode/windowActions/close');
+    export const TOGGLE_FULL_SCREEN = Command.toLocalizedCommand({
         id: 'workbench.action.toggleFullScreen',
-        category: 'View',
+        category: CommonCommands.VIEW_CATEGORY,
         label: 'Toggle Full Screen'
-    };
+    }, 'vscode/windowActions/toggleFullScreen', CommonCommands.VIEW_CATEGORY_KEY);
 }
 
 export namespace ElectronMenus {

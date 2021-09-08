@@ -24,11 +24,11 @@ export namespace KeyboardCommands {
 
     const KEYBOARD_CATEGORY = 'Keyboard';
 
-    export const CHOOSE_KEYBOARD_LAYOUT: Command = {
+    export const CHOOSE_KEYBOARD_LAYOUT = Command.toLocalizedCommand({
         id: 'core.keyboard.choose',
         category: KEYBOARD_CATEGORY,
         label: 'Choose Keyboard Layout',
-    };
+    }, 'theia/core/keyboard/choose', 'theia/core/keyboard');
 
 }
 

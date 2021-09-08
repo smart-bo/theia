@@ -76,6 +76,7 @@ import {
     fromDefinition,
     toDefinition
 } from '@theia/plugin-ext/lib/main/browser/callhierarchy/callhierarchy-type-converters';
+import { nls } from '@theia/core/lib/browser/nls';
 
 export namespace VscodeCommands {
     export const OPEN: Command = {
@@ -333,13 +334,13 @@ export class PluginVscodeCommandsContribution implements CommandContribution {
 
         commands.registerCommand({
             id: 'workbench.action.closeEditorsInGroup',
-            label: 'Close All Editors in Group'
+            label: nls.localize('vscode/editor.contribution/closeEditorsInGroup', 'Close All Editors in Group')
         }, {
             execute: (uri?: monaco.Uri) => performActionOnGroup(this.shell.closeTabs, uri)
         });
         commands.registerCommand({
             id: 'workbench.files.saveAllInGroup',
-            label: 'Save All in Group'
+            label: nls.localize('vscode/fileActions.contribution/saveAllInGroup', 'Save All in Group')
         }, {
             execute: (uri?: monaco.Uri) => performActionOnGroup(this.shell.saveTabs, uri)
         });

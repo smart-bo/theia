@@ -74,6 +74,10 @@ export class NotificationsContribution implements FrontendApplicationContributio
             isEnabled: () => true,
             execute: () => this.manager.toggleCenter()
         });
+        commands.registerCommand(NotificationsCommands.SHOW, {
+            isEnabled: () => true,
+            execute: () => this.manager.showCenter()
+        });
         commands.registerCommand(NotificationsCommands.HIDE, {
             execute: () => this.manager.hide()
         });

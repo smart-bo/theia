@@ -19,6 +19,7 @@ import { codicon } from '@theia/core/lib/browser';
 
 export namespace NotificationsCommands {
 
+    const NOTIFICATIONS_CATEGORY_KEY = 'vscode/notificationsCommands/notifications';
     const NOTIFICATIONS_CATEGORY = 'Notifications';
 
     export const TOGGLE: Command = {
@@ -28,14 +29,22 @@ export namespace NotificationsCommands {
         label: 'Toggle Notifications'
     };
 
-    export const HIDE: Command = {
-        id: 'notifications.commands.hide',
-    };
+    export const SHOW = Command.toLocalizedCommand({
+        id: 'notifications.commands.show',
+        category: NOTIFICATIONS_CATEGORY,
+        label: 'Show Notifications'
+    }, 'vscode/notificationsCommands/showNotifications', NOTIFICATIONS_CATEGORY_KEY);
 
-    export const CLEAR_ALL: Command = {
+    export const HIDE = Command.toLocalizedCommand({
+        id: 'notifications.commands.hide',
+        category: NOTIFICATIONS_CATEGORY,
+        label: 'Hide Notifications'
+    }, 'vscode/notificationsCommands/hideNotifications', NOTIFICATIONS_CATEGORY_KEY);
+
+    export const CLEAR_ALL = Command.toLocalizedCommand({
         id: 'notifications.commands.clearAll',
         category: NOTIFICATIONS_CATEGORY,
         iconClass: codicon('clear-all'),
         label: 'Clear All Notifications'
-    };
+    }, 'vscode/notificationsCommands/clearAllNotifications', NOTIFICATIONS_CATEGORY_KEY);
 }
