@@ -19,7 +19,6 @@
 *  Licensed under the MIT License. See License.txt in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import debounce = require('p-debounce');
 import { visit, parse } from 'jsonc-parser';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import URI from '@theia/core/lib/common/uri';
@@ -37,6 +36,7 @@ import { DebugConfiguration } from '../common/debug-common';
 import { WorkspaceVariableContribution } from '@theia/workspace/lib/browser/workspace-variable-contribution';
 import { PreferenceConfigurations } from '@theia/core/lib/browser/preferences/preference-configurations';
 import { MonacoTextModelService } from '@theia/monaco/lib/browser/monaco-text-model-service';
+import { debounceAsync } from '@theia/core/lib/common/promise-util';
 
 export interface WillProvideDebugConfiguration extends WaitUntilEvent {
 }
@@ -82,20 +82,22 @@ export class DebugConfigurationManager {
     protected debugConfigurationTypeKey: ContextKey<string>;
 
     protected initialized: Promise<void>;
+
     @postConstruct()
     protected async init(): Promise<void> {
         this.debugConfigurationTypeKey = this.contextKeyService.createKey<string>('debugConfigurationType', undefined);
-        await this.preferences.ready;
-        this.initialized = this.updateModels();
-        this.preferences.onPreferenceChanged(e => {
-            if (e.preferenceName === 'launch') {
-                this.updateModels();
-            }
+        this.initialized = this.preferences.ready.then(() => {
+            this.preferences.onPreferenceChanged(e => {
+                if (e.preferenceName === 'launch') {
+                    this.updateModels();
+                }
+            });
+            return this.updateModels();
         });
     }
 
     protected readonly models = new Map<string, DebugConfigurationModel>();
-    protected updateModels = debounce(async () => {
+    protected updateModels: () => Promise<void> = debounceAsync(async () => {
         const roots = await this.workspaceService.roots;
         const toDelete = new Set(this.models.keys());
         for (const rootStat of roots) {

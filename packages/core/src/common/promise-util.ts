@@ -90,3 +90,42 @@ export function delay<T>(ms: number): (value: T) => Promise<T> {
 export async function wait(ms: number): Promise<void> {
     await delay(ms)(undefined);
 }
+
+export interface DebounceAsyncOptions {
+    leading?: boolean
+    maxWait?: number
+    trailing?: boolean
+}
+
+/**
+ * Debounce asynchronous functions.
+ *
+ * It will not wait for the result promise to resolve before scheduling the following calls!
+ */
+export function debounceAsync<
+    // eslint-disable-next-line space-before-function-paren
+    F extends (...args: A) => R,
+    A extends unknown[] = Parameters<F>,
+    R extends Promise<unknown> = ReturnType<F>
+// eslint-disable-next-line @typescript-eslint/no-shadow
+>(func: F, wait?: number, options?: DebounceAsyncOptions): (...args: A) => R {
+    // Lazily load `lodash.debounce` to be nice on startup by not preloading this third-party.
+    const debouncedPromise = import('lodash.debounce').then(debounce => debounce(
+        (
+            resolve: (value: R) => void,
+            reject: (error: unknown) => void,
+            args: A,
+        ) => {
+            func(...args).then(resolve, reject);
+        },
+        wait,
+        options,
+    ));
+    // `lodash.debounce` returns a new function that may return `Promise<R> | undefined`.
+    // This `undefined` part is problematic as our APIs often return `Promise<R>` alone.
+    // We need to do a few shenanigans to make sure that we always return a promise that
+    // resolves once the debounced async function is actually called.
+    return (...args: A) => new Promise((resolve, reject) => {
+        debouncedPromise.then(debounced => debounced(resolve, reject, args));
+    }) as R;
+}

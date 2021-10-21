@@ -30,7 +30,6 @@ import { DebugStackFrame } from './model/debug-stack-frame';
 import { DebugSource } from './model/debug-source';
 import { DebugBreakpoint, DebugBreakpointOptions } from './model/debug-breakpoint';
 import { DebugSourceBreakpoint } from './model/debug-source-breakpoint';
-import debounce = require('p-debounce');
 import URI from '@theia/core/lib/common/uri';
 import { BreakpointManager } from './breakpoint/breakpoint-manager';
 import { DebugSessionOptions, InternalDebugSessionOptions } from './debug-session-options';
@@ -40,6 +39,7 @@ import { TerminalWidgetOptions, TerminalWidget } from '@theia/terminal/lib/brows
 import { DebugFunctionBreakpoint } from './model/debug-function-breakpoint';
 import { FileService } from '@theia/filesystem/lib/browser/file-service';
 import { DebugContribution } from './debug-contribution';
+import { debounceAsync } from '@theia/core/lib/common/promise-util';
 
 export enum DebugState {
     Inactive,
@@ -430,7 +430,7 @@ export class DebugSession implements CompositeTreeElement {
         this.updateCurrentThread();
     }
 
-    protected readonly scheduleUpdateThreads = debounce(() => this.updateThreads(undefined), 100);
+    protected readonly scheduleUpdateThreads: () => Promise<void> = debounceAsync(() => this.updateThreads(undefined), 100);
     protected pendingThreads = Promise.resolve();
 
     updateThreads(stoppedDetails: StoppedDetails | undefined): Promise<void> {

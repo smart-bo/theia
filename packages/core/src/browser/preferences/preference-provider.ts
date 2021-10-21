@@ -16,7 +16,6 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import debounce = require('p-debounce');
 import { injectable, inject } from 'inversify';
 import { JSONExt, JSONValue } from '@phosphor/coreutils';
 import URI from '../../common/uri';
@@ -24,6 +23,7 @@ import { Disposable, DisposableCollection, Emitter, Event } from '../../common';
 import { Deferred } from '../../common/promise-util';
 import { PreferenceScope } from './preference-scope';
 import { PreferenceLanguageOverrideService } from './preference-language-override-service';
+import { debounceAsync } from '../../common/promise-util';
 
 export interface PreferenceProviderDataChange {
     readonly preferenceName: string;
@@ -115,15 +115,16 @@ export abstract class PreferenceProvider implements Disposable {
         }
     }
 
-    protected fireDidPreferencesChanged = debounce(() => {
-        const changes = this.deferredChanges;
-        this.deferredChanges = undefined;
-        if (changes && Object.keys(changes).length) {
-            this.onDidPreferencesChangedEmitter.fire(changes);
-            return true;
-        }
-        return false;
-    }, 0);
+    protected fireDidPreferencesChanged: () => Promise<boolean> =
+        debounceAsync(async () => {
+            const changes = this.deferredChanges;
+            this.deferredChanges = undefined;
+            if (changes && Object.keys(changes).length) {
+                this.onDidPreferencesChangedEmitter.fire(changes);
+                return true;
+            }
+            return false;
+        }, 0);
 
     /**
      * Retrieve the stored value for the given preference and resource URI.

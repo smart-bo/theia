@@ -15,7 +15,6 @@
  ********************************************************************************/
 
 import * as jsoncparser from 'jsonc-parser';
-import debounce = require('p-debounce');
 import { inject, injectable, postConstruct, named } from '@theia/core/shared/inversify';
 import URI from '@theia/core/lib/common/uri';
 import { Emitter, Event } from '@theia/core/lib/common/event';
@@ -32,6 +31,7 @@ import { PreferenceConfigurations } from '@theia/core/lib/browser/preferences/pr
 import { FileService } from '@theia/filesystem/lib/browser/file-service';
 import { DisposableCollection } from '@theia/core/lib/common';
 import { TaskSchemaUpdater } from './task-schema-updater';
+import { debounceAsync } from '@theia/core/lib/common/promise-util';
 
 export interface TasksChange {
     scope: TaskConfigurationScope;
@@ -110,7 +110,7 @@ export class TaskConfigurationManager {
         this.updateModels();
     }
 
-    protected updateModels = debounce(async () => {
+    protected updateModels: () => Promise<void> = debounceAsync(async () => {
         const roots = await this.workspaceService.roots;
         const toDelete = new Set(
             [...this.models.keys()]
