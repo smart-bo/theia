@@ -15,7 +15,7 @@
  ********************************************************************************/
 
 import { CommandRegistry, Command, MenuModelRegistry, SelectionService, MessageService } from '@theia/core/lib/common';
-import { FrontendApplication, AbstractViewContribution, codicon } from '@theia/core/lib/browser';
+import { FrontendApplication, AbstractViewContribution, codicon, open, OpenerService } from '@theia/core/lib/browser';
 import { WidgetManager } from '@theia/core/lib/browser/widget-manager';
 import { EditorManager } from '@theia/editor/lib/browser';
 import { injectable, inject } from '@theia/core/shared/inversify';
@@ -23,7 +23,6 @@ import { GitDiffWidget, GIT_DIFF } from './git-diff-widget';
 import { GitCommitDetailWidget } from '../history/git-commit-detail-widget';
 import { GitDiffTreeModel } from './git-diff-tree-model';
 import { ScmService } from '@theia/scm/lib/browser/scm-service';
-import { open, OpenerService } from '@theia/core/lib/browser';
 import { NavigatorContextMenu, FileNavigatorContribution } from '@theia/navigator/lib/browser/navigator-contribution';
 import { UriCommandHandler } from '@theia/core/lib/common/uri-command-handler';
 import { GitQuickOpenService } from '../git-quick-open-service';
@@ -36,36 +35,42 @@ import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { TabBarToolbarContribution, TabBarToolbarRegistry, TabBarToolbarItem } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
 import { Emitter } from '@theia/core/lib/common/event';
 import { FileService } from '@theia/filesystem/lib/browser/file-service';
+import { nls } from '@theia/core/lib/common/nls';
 
 export namespace GitDiffCommands {
-    export const OPEN_FILE_DIFF: Command = {
+    export const OPEN_FILE_DIFF = Command.toLocalizedCommand({
         id: 'git-diff:open-file-diff',
         category: 'Git Diff',
-        label: 'Compare With...'
-    };
+        originalLabel: 'Compare With...',
+        label: nls.localize('vscode/fileActions/globalCompareFile', 'Compare With...')
+    });
     export const TREE_VIEW_MODE = {
         id: 'git.viewmode.tree',
-        tooltip: 'Toggle to Tree View',
+        tooltip: nls.localize('vscode/scmViewPane/viewModeTree', 'Toggle to Tree View'),
         iconClass: codicon('list-tree'),
-        label: 'Toggle to Tree View',
+        originalLabel: 'Toggle to Tree View',
+        label: nls.localize('vscode/scmViewPane/viewModeTree', 'Toggle to Tree View')
     };
     export const LIST_VIEW_MODE = {
         id: 'git.viewmode.list',
-        tooltip: 'Toggle to List View',
+        tooltip: nls.localize('vscode/scmViewPane/viewModeList', 'Toggle to List View'),
         iconClass: codicon('list-flat'),
-        label: 'Toggle to List View',
+        originalLabel: 'Toggle to List View',
+        label: nls.localize('vscode/scmViewPane/viewModeList', 'Toggle to List View')
     };
     export const PREVIOUS_CHANGE = {
         id: 'git.navigate-changes.previous',
-        tooltip: 'Toggle to List View',
+        tooltip: nls.localize('vscode/editor.contribution/navigate.prev.label', 'Previous Change'),
         iconClass: codicon('arrow-left'),
-        label: 'Previous Change',
+        originalLabel: 'Previous Change',
+        label: nls.localize('vscode/editor.contribution/navigate.prev.label', 'Previous Change')
     };
     export const NEXT_CHANGE = {
         id: 'git.navigate-changes.next',
-        tooltip: 'Toggle to List View',
+        tooltip: nls.localize('vscode/editor.contribution/navigate.next.label', 'Next Change'),
         iconClass: codicon('arrow-right'),
-        label: 'Next Change',
+        originalLabel: 'Next Change',
+        label: nls.localize('vscode/editor.contribution/navigate.next.label', 'Next Change')
     };
 }
 

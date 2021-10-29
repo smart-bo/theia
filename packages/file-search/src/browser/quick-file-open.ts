@@ -15,13 +15,12 @@
  ********************************************************************************/
 
 import { inject, injectable, optional, postConstruct } from '@theia/core/shared/inversify';
-import { OpenerService, KeybindingRegistry, QuickAccessRegistry, QuickAccessProvider } from '@theia/core/lib/browser';
+import { OpenerService, KeybindingRegistry, QuickAccessRegistry, QuickAccessProvider, CommonCommands } from '@theia/core/lib/browser';
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
 import URI from '@theia/core/lib/common/uri';
 import { FileSearchService, WHITESPACE_QUERY_SEPARATOR } from '../common/file-search-service';
-import { CancellationToken } from '@theia/core/lib/common';
+import { CancellationToken, Command } from '@theia/core/lib/common';
 import { LabelProvider } from '@theia/core/lib/browser/label-provider';
-import { Command } from '@theia/core/lib/common';
 import { NavigationLocationService } from '@theia/editor/lib/browser/navigation/navigation-location-service';
 import * as fuzzy from '@theia/core/shared/fuzzy';
 import { MessageService } from '@theia/core/lib/common/message-service';
@@ -29,11 +28,11 @@ import { FileSystemPreferences } from '@theia/filesystem/lib/browser';
 import { EditorOpenerOptions, EditorWidget, Position, Range } from '@theia/editor/lib/browser';
 import { findMatches, QuickInputService, QuickPickItem, QuickPicks } from '@theia/core/lib/browser/quick-input/quick-input-service';
 
-export const quickFileOpen: Command = {
+export const quickFileOpen = Command.toLocalizedCommand({
     id: 'file-search.openFile',
-    category: 'File',
+    category: CommonCommands.FILE_CATEGORY,
     label: 'Open File...'
-};
+}, 'vscode/workspaceActions/openFile', CommonCommands.FILE_CATEGORY_KEY);
 export interface FilterAndRange {
     filter: string;
     range?: Range;

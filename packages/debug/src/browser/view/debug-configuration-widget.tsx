@@ -16,7 +16,7 @@
 
 import * as React from '@theia/core/shared/react';
 import { injectable, inject, postConstruct } from '@theia/core/shared/inversify';
-import { Disposable } from '@theia/core/lib/common';
+import { CommandRegistry, Disposable } from '@theia/core/lib/common';
 import URI from '@theia/core/lib/common/uri';
 import { ReactWidget } from '@theia/core/lib/browser';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
@@ -27,7 +27,7 @@ import { DebugAction } from './debug-action';
 import { DebugViewModel } from './debug-view-model';
 import { DebugSessionOptions } from '../debug-session-options';
 import { DebugCommands } from '../debug-frontend-application-contribution';
-import { CommandRegistry } from '@theia/core/lib/common';
+import { nls } from '@theia/core/lib/common/nls';
 
 @injectable()
 export class DebugConfigurationWidget extends ReactWidget {
@@ -79,14 +79,15 @@ export class DebugConfigurationWidget extends ReactWidget {
     render(): React.ReactNode {
         const { options } = this;
         return <React.Fragment>
-            <DebugAction run={this.start} label='Start Debugging' iconClass='debug-start' ref={this.setStepRef} />
+            <DebugAction run={this.start} label={nls.localize('vscode/debugCommands/startDebug', 'Start Debugging')} iconClass='debug-start' ref={this.setStepRef} />
             <select className='theia-select debug-configuration' value={this.currentValue} onChange={this.setCurrentConfiguration}>
-                {options.length ? options : <option value='__NO_CONF__'>No Configurations</option>}
+                {options.length ? options : <option value='__NO_CONF__'>{nls.localize('vscode/debugActionViewItems/noConfigurations', 'No Configurations')}</option>}
                 <option disabled>{'Add Configuration...'.replace(/./g, '-')}</option>
-                <option value='__ADD_CONF__'>Add Configuration...</option>
+                <option value='__ADD_CONF__'>{nls.localize('vscode/debugActionViewItems/addConfiguration', 'Add Configuration...')}</option>
             </select>
-            <DebugAction run={this.openConfiguration} label='Open launch.json' iconClass='settings-gear' />
-            <DebugAction run={this.openConsole} label='Debug Console' iconClass='terminal' />
+            <DebugAction run={this.openConfiguration} label={nls.localize('vscode/debugCommands/openLaunchJson', 'Open "launch.json"', '"launch.json"')}
+                iconClass='settings-gear' />
+            <DebugAction run={this.openConsole} label={nls.localize('vscode/repl/debugConsole', 'Debug Console')} iconClass='terminal' />
         </React.Fragment>;
     }
     protected get currentValue(): string {

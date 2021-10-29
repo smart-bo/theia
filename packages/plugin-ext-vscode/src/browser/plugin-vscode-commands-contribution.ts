@@ -77,6 +77,7 @@ import {
     toDefinition
 } from '@theia/plugin-ext/lib/main/browser/callhierarchy/callhierarchy-type-converters';
 import { CustomEditorOpener } from '@theia/plugin-ext/lib/main/browser/custom-editors/custom-editor-opener';
+import { nls } from '@theia/core/lib/common/nls';
 
 export namespace VscodeCommands {
     export const OPEN: Command = {
@@ -289,7 +290,7 @@ export class PluginVscodeCommandsContribution implements CommandContribution {
             execute: () => commands.executeCommand(WorkspaceCommands.ADD_FOLDER.id)
         });
         commands.registerCommand({ id: 'workbench.action.gotoLine' }, {
-            execute: () => commands.executeCommand('editor.action.gotoLine')
+            execute: () => commands.executeCommand(EditorCommands.GOTO_LINE_COLUMN.id)
         });
         commands.registerCommand({ id: 'workbench.action.quickOpen' }, {
             execute: (prefix?: unknown) => this.quickInput.open(typeof prefix === 'string' ? prefix : '')
@@ -378,13 +379,13 @@ export class PluginVscodeCommandsContribution implements CommandContribution {
 
         commands.registerCommand({
             id: 'workbench.action.closeEditorsInGroup',
-            label: 'Close All Editors in Group'
+            label: nls.localize('vscode/editor.contribution/closeEditorsInGroup', 'Close All Editors in Group')
         }, {
             execute: (uri?: monaco.Uri) => performActionOnGroup(this.shell.closeTabs, uri)
         });
         commands.registerCommand({
             id: 'workbench.files.saveAllInGroup',
-            label: 'Save All in Group'
+            label: nls.localize('vscode/fileActions.contribution/saveAllInGroup', 'Save All in Group')
         }, {
             execute: (uri?: monaco.Uri) => performActionOnGroup(this.shell.saveTabs, uri)
         });
@@ -613,8 +614,7 @@ export class PluginVscodeCommandsContribution implements CommandContribution {
                         new CancellationTokenSource().token
                     );
                     if (definition) {
-                        const item = fromDefinition(definition);
-                        return [item];
+                        return Array.isArray(definition) ? definition.map(item => fromDefinition(item)) : [fromDefinition(definition)];
                     };
                     return [];
                 }

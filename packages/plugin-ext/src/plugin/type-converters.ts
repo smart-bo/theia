@@ -26,7 +26,6 @@ import { LanguageFilter, LanguageSelector, RelativePattern } from '@theia/callhi
 import { isMarkdownString, MarkdownString } from './markdown-string';
 import * as types from './types-impl';
 import { UriComponents } from '../common/uri-components';
-import { TaskGroup } from './types-impl';
 import { isReadonlyArray } from '../common/arrays';
 
 const SIDE_GROUP = -2;
@@ -684,18 +683,23 @@ export function fromCallHierarchyItem(item: theia.CallHierarchyItem): model.Call
         uri: item.uri,
         range: fromRange(item.range),
         selectionRange: fromRange(item.selectionRange),
-        tags: item.tags
+        tags: item.tags,
+        data: item.data,
     };
 }
 
 export function toCallHierarchyItem(value: model.CallHierarchyItem): types.CallHierarchyItem {
-    return new types.CallHierarchyItem(
+    const item = new types.CallHierarchyItem(
         SymbolKind.toSymbolKind(value.kind),
         value.name,
         value.detail ? value.detail : '',
         URI.revive(value.uri),
         toRange(value.range),
-        toRange(value.selectionRange));
+        toRange(value.selectionRange),
+    );
+    item.tags = value.tags;
+    item.data = value.data;
+    return item;
 }
 
 export function toCallHierarchyIncomingCall(value: model.CallHierarchyIncomingCall): types.CallHierarchyIncomingCall {
@@ -744,9 +748,9 @@ export function fromTask(task: theia.Task): TaskDto | undefined {
     }
 
     const group = task.group;
-    if (group === TaskGroup.Build) {
+    if (group === types.TaskGroup.Build) {
         taskDto.group = BUILD_GROUP;
-    } else if (group === TaskGroup.Test) {
+    } else if (group === types.TaskGroup.Test) {
         taskDto.group = TEST_GROUP;
     }
 
@@ -833,9 +837,9 @@ export function toTask(taskDto: TaskDto): theia.Task {
 
     if (group) {
         if (group === BUILD_GROUP) {
-            result.group = TaskGroup.Build;
+            result.group = types.TaskGroup.Build;
         } else if (group === TEST_GROUP) {
-            result.group = TaskGroup.Test;
+            result.group = types.TaskGroup.Test;
         }
     }
 

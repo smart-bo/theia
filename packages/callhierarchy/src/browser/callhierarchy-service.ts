@@ -17,10 +17,9 @@
 import { injectable, inject, named, postConstruct } from '@theia/core/shared/inversify';
 import { Position, DocumentUri } from '@theia/core/shared/vscode-languageserver-types';
 import { Definition, Caller, Callee } from './callhierarchy';
-import { ContributionProvider } from '@theia/core/lib/common';
+import { ContributionProvider, Disposable } from '@theia/core/lib/common';
 import { LanguageSelector, score } from '../common/language-selector';
 import URI from '@theia/core/lib/common/uri';
-import { Disposable } from '@theia/core/lib/common';
 import { CancellationToken } from '@theia/core';
 
 export const CallHierarchyService = Symbol('CallHierarchyService');
@@ -29,7 +28,7 @@ export interface CallHierarchyService {
 
     readonly selector: LanguageSelector;
 
-    getRootDefinition(uri: DocumentUri, position: Position, cancellationToken: CancellationToken): Promise<Definition | undefined>
+    getRootDefinition(uri: DocumentUri, position: Position, cancellationToken: CancellationToken): Promise<Definition | Definition[] | undefined>
     getCallers(definition: Definition, cancellationToken: CancellationToken): Promise<Caller[] | undefined>
     getCallees?(definition: Definition, cancellationToken: CancellationToken): Promise<Callee[] | undefined>
 }

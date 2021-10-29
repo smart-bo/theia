@@ -16,7 +16,7 @@
 
 import { URI } from '@theia/core/shared/vscode-uri';
 import { injectable, inject, postConstruct } from '@theia/core/shared/inversify';
-import { TreeViewsExt, TreeViewSelection } from '../../../common/plugin-api-rpc';
+import { TreeViewsExt, TreeViewItemCollapsibleState, TreeViewItem, TreeViewSelection } from '../../../common/plugin-api-rpc';
 import { Command } from '../../../common/plugin-api-rpc-model';
 import {
     TreeNode,
@@ -29,9 +29,10 @@ import {
     TREE_NODE_SEGMENT_GROW_CLASS,
     TREE_NODE_TAIL_CLASS,
     TreeModelImpl,
-    TreeViewWelcomeWidget
+    TreeViewWelcomeWidget,
+    TooltipService,
+    TooltipAttributes
 } from '@theia/core/lib/browser';
-import { TreeViewItem, TreeViewItemCollapsibleState } from '../../../common/plugin-api-rpc';
 import { MenuPath, MenuModelRegistry, ActionMenuNode } from '@theia/core/lib/common/menu';
 import * as React from '@theia/core/shared/react';
 import { PluginSharedStyle } from '../plugin-shared-style';
@@ -42,6 +43,8 @@ import { MessageService } from '@theia/core/lib/common/message-service';
 import { View } from '../../../common/plugin-protocol';
 import CoreURI from '@theia/core/lib/common/uri';
 import { ContextKeyService } from '@theia/core/lib/browser/context-key-service';
+import * as markdownit from 'markdown-it';
+import { isMarkdownString } from '../../../plugin/markdown-string';
 
 export const TREE_NODE_HYPERLINK = 'theia-TreeNodeHyperlink';
 export const VIEW_ITEM_CONTEXT_MENU: MenuPath = ['view-item-context-menu'];
@@ -245,6 +248,9 @@ export class TreeViewWidget extends TreeViewWelcomeWidget {
     @inject(ContextKeyService)
     protected readonly contextKeyService: ContextKeyService;
 
+    @inject(TooltipService)
+    protected readonly tooltipService: TooltipService;
+
     protected readonly onDidChangeVisibilityEmitter = new Emitter<boolean>();
     readonly onDidChangeVisibility = this.onDidChangeVisibilityEmitter.event;
 
@@ -274,13 +280,32 @@ export class TreeViewWidget extends TreeViewWelcomeWidget {
             classes.push(TREE_NODE_SEGMENT_GROW_CLASS);
         }
         const className = classes.join(' ');
-        const title = node.tooltip ||
-            (node.resourceUri && this.labelProvider.getLongName(new CoreURI(node.resourceUri)))
-            || this.toNodeName(node);
-        const attrs = this.decorateCaption(node, {
-            className, id: node.id,
-            title
-        });
+
+        let attrs: React.HTMLAttributes<HTMLElement> & Partial<TooltipAttributes> = {
+            ...this.decorateCaption(node, {}),
+            className,
+            id: node.id
+        };
+
+        if (node.tooltip && isMarkdownString(node.tooltip)) {
+            // Render markdown in custom tooltip
+            const tooltip = markdownit().render(node.tooltip.value);
+
+            attrs = {
+                ...attrs,
+                'data-tip': tooltip,
+                'data-for': this.tooltipService.tooltipId
+            };
+        } else {
+            const title = node.tooltip ||
+                (node.resourceUri && this.labelProvider.getLongName(new CoreURI(node.resourceUri)))
+                || this.toNodeName(node);
+
+            attrs = {
+                ...attrs,
+                title
+            };
+        }
 
         const children: React.ReactNode[] = [];
         const caption = this.toNodeName(node);
@@ -294,43 +319,11 @@ export class TreeViewWidget extends TreeViewWelcomeWidget {
         } else if (!highlight) {
             children.push(caption);
         }
-        return React.createElement('div', attrs, ...children);
-    }
-
-    protected getCaption(node: TreeNode): React.ReactNode {
-        const nodes: React.ReactNode[] = [];
-
-        const name = this.toNodeName(node) || '';
         const description = this.toNodeDescription(node);
-
-        let work = name;
-
-        const regex = /\[([^\[]+)\]\(([^\)]+)\)/g;
-        const matchResult = work.match(regex);
-
-        if (matchResult) {
-            matchResult.forEach((match, index) => {
-                nodes.push(<span key={`m${index}`}>{work.substring(0, work.indexOf(match))}</span>);
-
-                const execResult = regex.exec(name);
-                nodes.push(<a key={`l${index}`}
-                    href={execResult![2]}
-                    target='_blank'
-                    className={TREE_NODE_HYPERLINK}
-                    onClick={e => e.stopPropagation()}>{execResult![1]}</a>
-                );
-
-                work = work.substring(work.indexOf(match) + match.length);
-            });
+        if (description) {
+            children.push(<span className='theia-tree-view-description'>{description}</span>);
         }
-
-        return <div className='noWrapInfoTree'>
-            {...nodes}
-            {work && <span>{work}</span>}
-            {description && <span className='theia-tree-view-description'>
-                {description}
-            </span>}
-        </div>;
+        return React.createElement('div', attrs, ...children);
     }
 
     protected renderTailDecorations(node: TreeViewNode, props: NodeProps): React.ReactNode {
@@ -444,7 +437,9 @@ export class TreeViewWidget extends TreeViewWelcomeWidget {
     }
 
     protected render(): React.ReactNode {
-        return React.createElement('div', this.createContainerAttributes(), this.renderSearchInfo(), this.renderTree(this.model));
+        const node = React.createElement('div', this.createContainerAttributes(), this.renderSearchInfo(), this.renderTree(this.model));
+        this.tooltipService.update();
+        return node;
     }
 
     protected renderSearchInfo(): React.ReactNode {

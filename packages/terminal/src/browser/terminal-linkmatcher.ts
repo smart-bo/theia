@@ -15,7 +15,7 @@
  ********************************************************************************/
 
 import { injectable, inject } from '@theia/core/shared/inversify';
-import { isOSX, } from '@theia/core';
+import { isOSX } from '@theia/core';
 import { TerminalContribution } from './terminal-contribution';
 import { TerminalWidgetImpl } from './terminal-widget-impl';
 import { open, OpenerService } from '@theia/core/lib/browser/opener-service';
@@ -87,11 +87,7 @@ export abstract class AbstractCmdClickTerminalContribution implements TerminalCo
     }
 
     protected getHoverMessage(): string {
-        if (isOSX) {
-            return 'Cmd + click to follow link';
-        } else {
-            return 'Ctrl + click to follow link';
-        }
+        return TerminalWidgetImpl.getFollowLinkHover();
     }
 
 }

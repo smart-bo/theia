@@ -18,6 +18,7 @@ import { injectable } from '@theia/core/shared/inversify';
 import { MenuContribution, MenuModelRegistry, MenuPath, MAIN_MENU_BAR } from '@theia/core';
 import { CommonCommands, CommonMenus } from '@theia/core/lib/browser';
 import { EditorCommands } from './editor-command';
+import { nls } from '@theia/core/lib/common/nls';
 
 export const EDITOR_CONTEXT_MENU: MenuPath = ['editor_context_menu'];
 
@@ -41,10 +42,24 @@ export namespace EditorMainMenu {
     export const GO = [...MAIN_MENU_BAR, '5_go'];
 
     /**
-     * Navigation menu group in the `Go` menu.
+     * Navigation menu group in the `Go` main-menu.
      */
     export const NAVIGATION_GROUP = [...GO, '1_navigation_group'];
 
+    /**
+     * Workspace menu group in the `Go` main-menu.
+     */
+    export const WORKSPACE_GROUP = [...GO, '2_workspace_group'];
+
+    /**
+     * Language features menu group in the `Go` main-menu.
+     */
+    export const LANGUAGE_FEATURES_GROUP = [...GO, '3_language_features_group'];
+
+    /**
+     * Location menu group in the `Go` main-menu.
+     */
+    export const LOCATION_GROUP = [...GO, '4_locations'];
 }
 
 @injectable()
@@ -72,18 +87,26 @@ export class EditorMenuContribution implements MenuContribution {
         });
 
         // Editor navigation. Go > Back and Go > Forward.
-        registry.registerSubmenu(EditorMainMenu.GO, 'Go');
+        registry.registerSubmenu(EditorMainMenu.GO, nls.localize('vscode/menubar/mGoto', 'Go'));
         registry.registerMenuAction(EditorMainMenu.NAVIGATION_GROUP, {
             commandId: EditorCommands.GO_BACK.id,
-            label: 'Back'
+            label: EditorCommands.GO_BACK.label,
+            order: '1'
         });
         registry.registerMenuAction(EditorMainMenu.NAVIGATION_GROUP, {
             commandId: EditorCommands.GO_FORWARD.id,
-            label: 'Forward'
+            label: EditorCommands.GO_FORWARD.label,
+            order: '2'
         });
         registry.registerMenuAction(EditorMainMenu.NAVIGATION_GROUP, {
             commandId: EditorCommands.GO_LAST_EDIT.id,
-            label: 'Last Edit Location'
+            label: nls.localize('vscode/editor.contribution/miLastEditLocation', 'Last Edit Location'),
+            order: '3'
+        });
+
+        registry.registerMenuAction(EditorMainMenu.LOCATION_GROUP, {
+            commandId: EditorCommands.GOTO_LINE_COLUMN.id,
+            order: '1'
         });
 
         // Toggle Commands.
@@ -94,18 +117,18 @@ export class EditorMenuContribution implements MenuContribution {
         });
         registry.registerMenuAction(CommonMenus.VIEW_TOGGLE, {
             commandId: EditorCommands.TOGGLE_MINIMAP.id,
-            label: 'Show Minimap',
+            label: EditorCommands.TOGGLE_MINIMAP.label,
             order: '1',
         });
         registry.registerMenuAction(CommonMenus.VIEW_TOGGLE, {
             commandId: EditorCommands.TOGGLE_RENDER_WHITESPACE.id,
-            label: 'Render Whitespace',
+            label: EditorCommands.TOGGLE_RENDER_WHITESPACE.label,
             order: '2'
         });
         registry.registerMenuAction(CommonMenus.FILE_CLOSE, {
             commandId: CommonCommands.CLOSE_MAIN_TAB.id,
-            label: 'Close Editor',
-            order: '0'
+            label: nls.localize('vscode/editor.contribution/closeEditor', 'Close Editor'),
+            order: '1'
         });
     }
 

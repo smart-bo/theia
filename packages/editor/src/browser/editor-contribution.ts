@@ -18,14 +18,14 @@ import { EditorManager } from './editor-manager';
 import { TextEditor } from './editor';
 import { injectable, inject, optional } from '@theia/core/shared/inversify';
 import { StatusBarAlignment, StatusBar } from '@theia/core/lib/browser/status-bar/status-bar';
-import { FrontendApplicationContribution, DiffUris, DockLayout, QuickInputService } from '@theia/core/lib/browser';
+import { FrontendApplicationContribution, DiffUris, DockLayout, QuickInputService, KeybindingRegistry, KeybindingContribution } from '@theia/core/lib/browser';
 import { ContextKeyService } from '@theia/core/lib/browser/context-key-service';
 import { CommandHandler, DisposableCollection } from '@theia/core';
 import { EditorCommands } from './editor-command';
 import { CommandRegistry, CommandContribution } from '@theia/core/lib/common';
-import { KeybindingRegistry, KeybindingContribution } from '@theia/core/lib/browser';
 import { LanguageService } from '@theia/core/lib/browser/language-service';
 import { SUPPORTED_ENCODINGS } from '@theia/core/lib/browser/supported-encodings';
+import { nls } from '@theia/core/lib/common/nls';
 
 @injectable()
 export class EditorContribution implements FrontendApplicationContribution, CommandContribution, KeybindingContribution {
@@ -95,7 +95,7 @@ export class EditorContribution implements FrontendApplicationContribution, Comm
             alignment: StatusBarAlignment.RIGHT,
             priority: 1,
             command: EditorCommands.CHANGE_LANGUAGE.id,
-            tooltip: 'Select Language Mode'
+            tooltip: nls.localize('vscode/editorStatus/selectLanguageMode', 'Select Language Mode')
         });
     }
 
@@ -109,7 +109,7 @@ export class EditorContribution implements FrontendApplicationContribution, Comm
             alignment: StatusBarAlignment.RIGHT,
             priority: 10,
             command: EditorCommands.CHANGE_ENCODING.id,
-            tooltip: 'Select Encoding'
+            tooltip: nls.localize('vscode/editorStatus/selectEncoding', 'Select Encoding')
         });
     }
 
@@ -120,11 +120,11 @@ export class EditorContribution implements FrontendApplicationContribution, Comm
         }
         const { cursor } = editor;
         this.statusBar.setElement('editor-status-cursor-position', {
-            text: `Ln ${cursor.line + 1}, Col ${editor.getVisibleColumn(cursor)}`,
+            text: nls.localize('vscode/editorStatus/singleSelection', 'Ln {0}, Col {1}', (cursor.line + 1).toString(), editor.getVisibleColumn(cursor).toString()),
             alignment: StatusBarAlignment.RIGHT,
             priority: 100,
-            tooltip: 'Go To Line',
-            command: 'editor.action.gotoLine'
+            tooltip: EditorCommands.GOTO_LINE_COLUMN.label,
+            command: EditorCommands.GOTO_LINE_COLUMN.id
         });
     }
 

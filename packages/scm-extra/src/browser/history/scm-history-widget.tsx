@@ -24,14 +24,13 @@ import URI from '@theia/core/lib/common/uri';
 import { ScmService } from '@theia/scm/lib/browser/scm-service';
 import { ScmHistoryProvider } from '.';
 import { SCM_HISTORY_ID, SCM_HISTORY_MAX_COUNT, SCM_HISTORY_LABEL } from './scm-history-contribution';
-import { ScmHistoryCommit, ScmFileChange } from '../scm-file-change-node';
+import { ScmHistoryCommit, ScmFileChange, ScmFileChangeNode } from '../scm-file-change-node';
 import { ScmAvatarService } from '@theia/scm/lib/browser/scm-avatar-service';
-import { ScmItemComponent } from '../scm-navigable-list-widget';
-import { ScmFileChangeNode } from '../scm-file-change-node';
-import { ScmNavigableListWidget } from '../scm-navigable-list-widget';
+import { ScmItemComponent, ScmNavigableListWidget } from '../scm-navigable-list-widget';
 import * as React from '@theia/core/shared/react';
 import { AlertMessage } from '@theia/core/lib/browser/widgets/alert-message';
 import { FileService } from '@theia/filesystem/lib/browser/file-service';
+import { nls } from '@theia/core/lib/common/nls';
 
 export const ScmHistorySupport = Symbol('scm-history-support');
 export interface ScmHistorySupport {
@@ -263,7 +262,10 @@ export class ScmHistoryWidget extends ScmNavigableListWidget<ScmHistoryListNode>
                 this.status = { state: 'error', errorMessage: <React.Fragment>History is not supported for {repository.provider.label} source control.</React.Fragment> };
             }
         } else {
-            this.status = { state: 'error', errorMessage: <React.Fragment>There is no repository selected in this workspace.</React.Fragment> };
+            this.status = {
+                state: 'error',
+                errorMessage: <React.Fragment>{nls.localize('vscode/scm.contribution/no open repo', 'There is no repository selected in this workspace.')}</React.Fragment>
+            };
         }
     }
 

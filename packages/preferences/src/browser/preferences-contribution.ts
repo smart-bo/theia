@@ -27,8 +27,8 @@ import {
     PreferenceService,
     QuickInputService,
     QuickPickItem,
+    isFirefox
 } from '@theia/core/lib/browser';
-import { isFirefox } from '@theia/core/lib/browser';
 import { isOSX } from '@theia/core/lib/common/os';
 import { TabBarToolbarRegistry } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
 import { EditorManager, EditorWidget } from '@theia/editor/lib/browser';
@@ -177,7 +177,7 @@ export class PreferencesContribution extends AbstractViewContribution<Preference
         toolbar.registerItem({
             id: PreferencesCommands.OPEN_PREFERENCES_JSON_TOOLBAR.id,
             command: PreferencesCommands.OPEN_PREFERENCES_JSON_TOOLBAR.id,
-            tooltip: 'Open Preferences in JSON',
+            tooltip: PreferencesCommands.OPEN_USER_PREFERENCES_JSON.label,
             priority: 0,
         });
     }
