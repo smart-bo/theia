@@ -14,7 +14,6 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import debounce from 'p-debounce';
 import { injectable, inject, postConstruct } from '@theia/core/shared/inversify';
 import { Disposable, DisposableCollection, Event, Emitter } from '@theia/core/lib/common';
 import URI from '@theia/core/lib/common/uri';
@@ -26,6 +25,7 @@ import { DebugSourceBreakpoint } from '../model/debug-source-breakpoint';
 import { DebugWatchExpression } from './debug-watch-expression';
 import { DebugWatchManager } from '../debug-watch-manager';
 import { DebugFunctionBreakpoint } from '../model/debug-function-breakpoint';
+import { debounceAsync } from '@theia/core/lib/common/promise-util';
 
 export const DebugViewOptions = Symbol('DebugViewOptions');
 export interface DebugViewOptions {
@@ -246,7 +246,7 @@ export class DebugViewModel implements Disposable {
     }
 
     protected refreshWatchExpressionsQueue = Promise.resolve();
-    protected refreshWatchExpressions = debounce(() => {
+    protected refreshWatchExpressions: () => Promise<void> = debounceAsync(async () => {
         this.refreshWatchExpressionsQueue = this.refreshWatchExpressionsQueue.then(async () => {
             try {
                 for (const watchExpression of this.watchExpressions) {
@@ -257,5 +257,5 @@ export class DebugViewModel implements Disposable {
             }
         });
     }, 50);
-
 }
+

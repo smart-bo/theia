@@ -16,9 +16,9 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import * as debounce from 'p-debounce';
 import { Disposable, DisposableCollection, Emitter } from '@theia/core/lib/common';
 import { JSONExt, JSONObject } from '@theia/core/shared/@phosphor/coreutils';
+import { debounceAsync } from '@theia/core/lib/common/promise-util';
 
 export interface ScmInputIssue {
     message: string;
@@ -106,7 +106,7 @@ export class ScmInput implements Disposable {
         this.fireDidChange();
     }
 
-    validate = debounce(async (): Promise<void> => {
+    validate: () => Promise<void> = debounceAsync(async () => {
         if (this.options.validator) {
             this.issue = await this.options.validator(this.value);
         }

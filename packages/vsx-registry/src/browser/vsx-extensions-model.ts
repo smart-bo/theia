@@ -15,7 +15,6 @@
  ********************************************************************************/
 
 import { injectable, inject, postConstruct } from '@theia/core/shared/inversify';
-import debounce from 'p-debounce';
 import * as showdown from 'showdown';
 import * as DOMPurify from '@theia/core/shared/dompurify';
 import { Emitter } from '@theia/core/lib/common/event';
@@ -24,7 +23,7 @@ import { HostedPluginSupport } from '@theia/plugin-ext/lib/hosted/browser/hosted
 import { VSXExtension, VSXExtensionFactory } from './vsx-extension';
 import { ProgressService } from '@theia/core/lib/common/progress-service';
 import { VSXExtensionsSearchModel } from './vsx-extensions-search-model';
-import { Deferred } from '@theia/core/lib/common/promise-util';
+import { debounceAsync, Deferred } from '@theia/core/lib/common/promise-util';
 import { PreferenceInspectionScope, PreferenceService } from '@theia/core/lib/browser';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { RecommendedExtensions } from './recommended-extensions/recommended-extensions-preference-contribution';
@@ -158,7 +157,7 @@ export class VSXExtensionsModel {
     }
 
     protected searchCancellationTokenSource = new CancellationTokenSource();
-    protected updateSearchResult = debounce(() => {
+    protected updateSearchResult: () => Promise<void> = debounceAsync(() => {
         this.searchCancellationTokenSource.cancel();
         this.searchCancellationTokenSource = new CancellationTokenSource();
         const query = this.search.query;

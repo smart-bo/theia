@@ -18,7 +18,7 @@ import { injectable, inject, postConstruct } from '@theia/core/shared/inversify'
 import { TreeSource } from '@theia/core/lib/browser/source-tree';
 import { DebugViewModel } from './debug-view-model';
 import { DebugWatchExpression } from './debug-watch-expression';
-import debounce = require('p-debounce');
+import { debounceAsync } from '@theia/core/lib/common/promise-util';
 
 @injectable()
 export class DebugWatchSource extends TreeSource {
@@ -32,7 +32,7 @@ export class DebugWatchSource extends TreeSource {
         this.toDispose.push(this.model.onDidChangeWatchExpressions(() => this.refresh()));
     }
 
-    protected readonly refresh = debounce(() => this.fireDidChange(), 100);
+    protected readonly refresh: () => Promise<void> = debounceAsync(async () => this.fireDidChange(), 100);
 
     async getElements(): Promise<IterableIterator<DebugWatchExpression>> {
         return this.model.watchExpressions[Symbol.iterator]();

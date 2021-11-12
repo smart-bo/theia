@@ -21,7 +21,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as Ajv from 'ajv';
-import debounce = require('p-debounce');
 import { postConstruct, injectable, inject } from '@theia/core/shared/inversify';
 import { JsonSchemaContribution, JsonSchemaRegisterContext } from '@theia/core/lib/browser/json-schema-store';
 import { InMemoryResources, deepClone, Emitter } from '@theia/core/lib/common';
@@ -33,6 +32,7 @@ import { TaskDefinitionRegistry } from './task-definition-registry';
 import { TaskServer } from '../common';
 import { UserStorageUri } from '@theia/userstorage/lib/browser';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
+import { debounceAsync } from '@theia/core/lib/common/promise-util';
 
 export const taskSchemaId = 'vscode://schemas/tasks';
 
@@ -84,7 +84,7 @@ export class TaskSchemaUpdater implements JsonSchemaContribution {
         this.workspaceService.updateSchema('tasks', { $ref: this.uri.toString() });
     }
 
-    readonly update = debounce(() => this.doUpdate(), 0);
+    readonly update: () => Promise<void> = debounceAsync(async () => this.doUpdate(), 0);
     protected doUpdate(): void {
         taskConfigurationSchema.anyOf = [processTaskConfigurationSchema, ...customizedDetectedTasks, ...customSchemas];
 
