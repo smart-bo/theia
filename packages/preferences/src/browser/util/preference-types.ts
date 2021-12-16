@@ -113,6 +113,11 @@ export namespace PreferencesCommands {
         id: 'preferences:openJson.toolbar',
         iconClass: 'codicon codicon-json'
     };
+
+    export const SHOW_MODIFIED_SETTING_TOOLBAR: Command = {
+        id: 'preferences:showModifiedSetting.toolbar',
+        iconClass: 'codicon codicon-heart'
+    };
     export const COPY_JSON_NAME = Command.toDefaultLocalizedCommand({
         id: 'preferences:copyJson.name',
         label: 'Copy Setting ID'
@@ -149,6 +154,12 @@ export namespace PreferencesCommands {
         id: 'workbench.action.openSettingsJson',
         category: CommonCommands.PREFERENCES_CATEGORY,
         label: 'Open Settings (JSON)'
+    });
+
+    export const SHOW_MODIFIED_SETTING = Command.toDefaultLocalizedCommand({
+        id: 'workbench.action.openSettingsJson',
+        category: CommonCommands.PREFERENCES_CATEGORY,
+        label: 'Show modified setting'
     });
 
     export const OPEN_WORKSPACE_PREFERENCES_JSON = Command.toDefaultLocalizedCommand({

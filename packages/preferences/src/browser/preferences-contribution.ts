@@ -79,6 +79,13 @@ export class PreferencesContribution extends AbstractViewContribution<Preference
                 this.openPreferencesJSON(preferenceId);
             }
         });
+        commands.registerCommand(PreferencesCommands.SHOW_MODIFIED_SETTING_TOOLBAR, {
+            isEnabled: () => true,
+            isVisible: w => this.withWidget(w, () => true),
+            execute: (preferenceId: string) => {
+                this.openPreferencesJSON(preferenceId);
+            }
+        });
         commands.registerCommand(PreferencesCommands.COPY_JSON_NAME, {
             isEnabled: Preference.EditorCommandArgs.is,
             isVisible: Preference.EditorCommandArgs.is,
@@ -124,6 +131,9 @@ export class PreferencesContribution extends AbstractViewContribution<Preference
             })
         });
         commands.registerCommand(PreferencesCommands.OPEN_USER_PREFERENCES_JSON, {
+            execute: async () => this.openJson(PreferenceScope.User)
+        });
+        commands.registerCommand(PreferencesCommands.SHOW_MODIFIED_SETTING, {
             execute: async () => this.openJson(PreferenceScope.User)
         });
         commands.registerCommand(PreferencesCommands.OPEN_WORKSPACE_PREFERENCES_JSON, {
@@ -178,8 +188,15 @@ export class PreferencesContribution extends AbstractViewContribution<Preference
             id: PreferencesCommands.OPEN_PREFERENCES_JSON_TOOLBAR.id,
             command: PreferencesCommands.OPEN_PREFERENCES_JSON_TOOLBAR.id,
             tooltip: PreferencesCommands.OPEN_USER_PREFERENCES_JSON.label,
+            priority: 1,
+        });
+        toolbar.registerItem({
+            id: PreferencesCommands.SHOW_MODIFIED_SETTING_TOOLBAR.id,
+            command: PreferencesCommands.SHOW_MODIFIED_SETTING_TOOLBAR.id,
+            tooltip: PreferencesCommands.SHOW_MODIFIED_SETTING.label,
             priority: 0,
         });
+
     }
 
     protected async openPreferencesJSON(opener: string | PreferencesWidget): Promise<void> {
