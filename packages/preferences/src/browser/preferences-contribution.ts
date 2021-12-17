@@ -80,10 +80,8 @@ export class PreferencesContribution extends AbstractViewContribution<Preference
             }
         });
         commands.registerCommand(PreferencesCommands.SHOW_MODIFIED_SETTING_TOOLBAR, {
-            isEnabled: () => true,
-            isVisible: w => this.withWidget(w, () => true),
-            execute: (preferenceId: string) => {
-                this.openPreferencesJSON(preferenceId);
+            execute: () => {
+                this.filterModifiedSetting();
             }
         });
         commands.registerCommand(PreferencesCommands.COPY_JSON_NAME, {
@@ -199,6 +197,16 @@ export class PreferencesContribution extends AbstractViewContribution<Preference
 
     }
 
+    protected async filterModifiedSetting(): Promise<void> {
+
+
+
+
+
+
+
+
+    }
     protected async openPreferencesJSON(opener: string | PreferencesWidget): Promise<void> {
         const { scope, activeScopeIsFolder, uri } = this.scopeTracker.currentScope;
         const scopeID = Number(scope);

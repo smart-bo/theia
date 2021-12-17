@@ -24,6 +24,7 @@ import {
 } from '@theia/core/lib/browser';
 import { Command, MenuPath } from '@theia/core';
 import { JSONValue } from '@theia/core/shared/@phosphor/coreutils';
+import { boolean } from 'yargs';
 
 export namespace Preference {
 
@@ -55,6 +56,7 @@ export namespace Preference {
             const id = nodeId.substring(separator + 1, nodeId.length);
             return { group, id };
         };
+
     }
 
     export interface CompositeTreeNode extends BaseCompositeTreeNode {
@@ -64,6 +66,7 @@ export namespace Preference {
     export interface LeafNode extends BaseTreeNode {
         depth: number;
         preference: { data: PreferenceDataProperty };
+        isModified: boolean;
     }
 
     export namespace LeafNode {
