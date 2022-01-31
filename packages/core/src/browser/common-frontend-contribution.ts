@@ -376,6 +376,7 @@ export class CommonFrontendContribution implements FrontendApplicationContributi
         this.registerCtrlWHandling();
 
         this.updateStyles();
+        this.wrapTabs();
         this.updateThemeFromPreference('workbench.colorTheme');
         this.updateThemeFromPreference('workbench.iconTheme');
         this.preferences.onPreferenceChanged(e => this.handlePreferenceChange(e, app));
@@ -410,6 +411,13 @@ export class CommonFrontendContribution implements FrontendApplicationContributi
         document.body.classList.remove('theia-editor-highlightModifiedTabs');
         if (this.preferences['workbench.editor.highlightModifiedTabs']) {
             document.body.classList.add('theia-editor-highlightModifiedTabs');
+        }
+    }
+
+    protected wrapTabs(): void {
+        document.body.classList.remove('theia-editor-wrapTabs');
+        if (this.preferences['workbench.editor.wraptabs']) {
+            document.body.classList.add('theia-editor-wrapTabs');
         }
     }
 
@@ -464,6 +472,10 @@ export class CommonFrontendContribution implements FrontendApplicationContributi
                 } else {
                     app.shell.leftPanelHandler.removeTopMenu(mainMenuId);
                 }
+                break;
+            }
+            case 'workbench.editor.wraptabs': {
+                this.wrapTabs();
                 break;
             }
         }
